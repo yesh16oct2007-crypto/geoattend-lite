@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GeoAttend Lite — Geofenced Attendance</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+:root{--bg:#faf6f1;--card:#fff;--ink:#14100c;--mut:#6d625a;--line:#eadfd3;--acc:#e8620a;--accbg:#ffe9d6;--ok:#12805a;--okbg:#d8f3e6;--warn:#9a6a00;--warnbg:#fff3c9;--bad:#c0283c;--badbg:#fde1e5;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a0a0a;--card:#141210;--ink:#f5efe8;--mut:#9a8f84;--line:#2a2420;--acc:#ff7a1a;--accbg:#2e1a0a;--ok:#3ddc97;--okbg:#0f2a1f;--warn:#ffd23c;--warnbg:#332a0a;--bad:#ff5b6e;--badbg:#3a1219}}
+:root[data-theme="dark"]{--bg:#0a0a0a;--card:#141210;--ink:#f5efe8;--mut:#9a8f84;--line:#2a2420;--acc:#ff7a1a;--accbg:#2e1a0a;--ok:#3ddc97;--okbg:#0f2a1f;--warn:#ffd23c;--warnbg:#332a0a;--bad:#ff5b6e;--badbg:#3a1219}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+[hidden]{display:none!important}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 'Space Grotesk',system-ui,sans-serif}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+nav{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;gap:20px;padding:12px 5vw;padding-top:calc(12px + env(safe-area-inset-top,0px));background:rgba(10,10,10,.78);backdrop-filter:blur(12px);color:#f5efe8}
+nav b{font-size:18px;letter-spacing:-.02em;margin-right:auto}nav b i{color:#ff7a1a;font-style:normal}
+nav a{color:#d8cfc4;text-decoration:none;font-size:14px}nav a:hover{color:#ff7a1a}
+@media(max-width:640px){nav a.h{display:none}}
+.hero{position:relative;min-height:100vh;min-height:100svh;background:radial-gradient(ellipse at 70% 40%,#4a2208,#0a0a0a 70%);color:#f5efe8;display:flex;align-items:center;overflow:hidden}
+#c3d{position:absolute;inset:0;width:100%;height:100%}
+.hero .in{position:relative;z-index:2;padding:0 5vw;max-width:680px;pointer-events:none}.hero .in *{pointer-events:auto}
+.tag{display:inline-block;font:500 12px 'JetBrains Mono',monospace;color:#ff7a1a;border:1px solid #ff7a1a55;padding:4px 10px;border-radius:99px;letter-spacing:.08em}
+h1{font-size:clamp(38px,7vw,76px);line-height:1;letter-spacing:-.04em;margin:18px 0}h1 em{font-style:normal;color:#ff7a1a}
+.hero p{color:#c9bfb4;font-size:18px;max-width:520px}
+.btn{display:inline-block;border:0;cursor:pointer;font:600 15px 'Space Grotesk',sans-serif;padding:12px 20px;border-radius:10px;background:var(--acc);color:#160a00;text-decoration:none}
+.btn.g{background:transparent;color:inherit;border:1px solid var(--line)}.btn.s{padding:6px 11px;font-size:13px}
+.hero .btn.g{border-color:#5a4636;color:#f5efe8}
+section{padding:80px 5vw;max-width:1200px;margin:auto}
+h2{font-size:clamp(28px,4vw,42px);letter-spacing:-.03em;margin:0 0 8px}.sub{color:var(--mut);max-width:620px;margin:0 0 32px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
+.card h3{margin:6px 0;font-size:18px}.card p{margin:0;color:var(--mut);font-size:14.5px}
+.num{font:500 13px 'JetBrains Mono',monospace;color:var(--acc)}
+.rv{opacity:0;transform:translateY(24px);transition:.7s}.rv.on{opacity:1;transform:none}
+.tabs{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:20px}
+.tabs button{border:0;background:none;color:var(--mut);font:600 14px 'Space Grotesk';padding:9px 18px;border-radius:9px;cursor:pointer}
+.tabs button.on{background:var(--acc);color:#160a00}
+.app{display:grid;gap:16px;grid-template-columns:1fr 1fr}@media(max-width:860px){.app{grid-template-columns:1fr}}
+.app[hidden]{display:none}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;grid-column:1/-1}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}.stat b{display:block;font-size:30px;letter-spacing:-.03em;line-height:1.1}.stat span{font-size:12px;color:var(--mut)}
+@media(max-width:520px){.stats{grid-template-columns:repeat(2,1fr)}}
+.code{font:500 clamp(36px,8vw,56px) 'JetBrains Mono',monospace;letter-spacing:.12em;color:var(--acc);display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.ring{width:48px;height:48px;transform:rotate(-90deg)}.ring circle{fill:none;stroke-width:5}
+label{display:block;font-size:12px;color:var(--mut);margin:12px 0 4px;text-transform:uppercase;letter-spacing:.06em}
+input,select{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:16px 'Space Grotesk',sans-serif}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.ck{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:14px;color:var(--mut)}.ck input{width:auto}
+.tw{overflow-x:auto;max-height:380px;overflow-y:auto}table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;padding:6px 8px;position:sticky;top:0;background:var(--card)}
+td{padding:9px 8px;border-top:1px solid var(--line);vertical-align:top}
+.b{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:99px}
+.b.p{background:var(--okbg);color:var(--ok)}.b.f{background:var(--warnbg);color:var(--warn)}.b.r{background:var(--badbg);color:var(--bad)}.b.a{background:var(--line);color:var(--mut)}
+.fl{font-size:12px;color:var(--warn);margin-top:2px}.fl.r{color:var(--bad)}
+svg.map{width:100%;height:auto;border-radius:12px;background:var(--bg);border:1px solid var(--line);touch-action:none;cursor:crosshair}
+.res{margin-top:14px;padding:14px;border-radius:12px;font-size:14.5px}.res.p{background:var(--okbg);color:var(--ok)}.res.f{background:var(--warnbg);color:var(--warn)}.res.r{background:var(--badbg);color:var(--bad)}
+.note{font-size:13px;color:var(--mut);margin-top:12px}
+footer{padding:40px 5vw;text-align:center;color:var(--mut);font-size:13px;border-top:1px solid var(--line)}
+@media(prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}html{scroll-behavior:auto}}
+
+.btn{box-shadow:0 6px 18px -8px var(--acc);transition:transform .15s,filter .15s}.btn:hover{transform:translateY(-1px);filter:brightness(1.1)}.btn.g{box-shadow:none}
+.card{box-shadow:0 12px 32px -20px rgba(0,0,0,.55)}
+#bar{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:14px;padding:12px 16px}
+.chip{display:inline-block;background:var(--acc);color:#160a00;font:500 11px 'JetBrains Mono',monospace;letter-spacing:.08em;padding:3px 9px;border-radius:99px;margin-right:10px}
+.stat{border-top:3px solid var(--acc)}.stat:nth-child(2){border-top-color:var(--warn)}.stat:nth-child(3){border-top-color:var(--bad)}.stat:nth-child(4){border-top-color:var(--mut)}.stat b{font-size:34px}
+input:focus,select:focus{outline:2px solid var(--acc);outline-offset:1px}
+tbody tr:hover td{background:color-mix(in srgb,var(--acc) 7%,transparent)}
+#vL{border-top:3px solid var(--acc)}#vS{max-width:980px;margin:0 auto}#vS .card:first-child{border-top:3px solid var(--acc)}#vF>.card{border-top:3px solid var(--acc)}
+.code{background:var(--bg);border:1px dashed var(--acc);border-radius:14px;padding:12px 18px}
+#scode{font-size:28px;text-align:center;letter-spacing:.3em}
+#go{width:100%;padding:14px;font-size:16px}
+#portal{min-height:100vh;min-height:100svh;padding-top:24px;display:flex;flex-direction:column}#vL{width:100%}
+.auth{display:grid;grid-template-columns:1.05fr 1fr;width:100%;max-width:1000px;margin:auto;border:1px solid var(--line);border-radius:22px;overflow:hidden;background:var(--card);box-shadow:0 30px 60px -30px rgba(0,0,0,.6)}
+#vL{border-top:1px solid var(--line)}
+.brand{position:relative;padding:44px 40px;color:#f5efe8;background:linear-gradient(160deg,#241103,#0a0a0a 65%);display:flex;flex-direction:column;gap:18px}
+.brand::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 15% 105%,#ff7a1a55,transparent 55%),linear-gradient(#ffffff08 1px,transparent 1px) 0 0/32px 32px,linear-gradient(90deg,#ffffff08 1px,transparent 1px) 0 0/32px 32px;pointer-events:none}
+.brand>*{position:relative}.bl{display:flex;align-items:center;gap:10px;font-size:18px}
+.brand h1{font-size:clamp(28px,3.4vw,40px);line-height:1.1;letter-spacing:-.03em;margin:14px 0 0;color:#f5efe8}.brand p{color:#cfc4b8;margin:0}
+.brand ul{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:14px}.brand li{border-left:3px solid #ff7a1a;padding-left:14px}.brand li b{display:block;font-size:15px}.brand li span{font-size:13.5px;color:#b5a89b}
+.brand small{margin-top:auto;color:#8f8377;font-size:12px}
+.form{padding:44px 40px;display:flex;flex-direction:column;justify-content:center}
+.form .btn{padding:12px 18px}.form .row .btn:first-child{flex:1}
+.ph{grid-column:1/-1;border-bottom:1px solid var(--line);padding-bottom:14px}.ph h2{font-size:28px;margin:0}.ph p{margin:4px 0 0;color:var(--mut);font-size:15px}
+@media(max-width:800px){.auth{grid-template-columns:1fr}.brand{padding:28px}.brand ul,.brand small{display:none}.form{padding:28px}}
+.auth{grid-template-columns:1fr;max-width:440px}.form{padding:32px}
+</style>
+</head>
+<body>
+<nav><b style="display:flex;align-items:center;gap:10px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z" fill="#ff7a1a"/><circle cx="12" cy="9" r="2.6" fill="#0a0a0a"/></svg><span>Geo<i>Attend</i> Lite</span></b><span id="sync" class="mono" style="font-size:11px;color:#d8cfc4">Connecting…</span></nav>
+
+<section id="portal">
+<div id="bar" class="row" hidden style="justify-content:space-between;margin:0 0 16px"><b id="who"></b><button class="btn g s" id="out">Log out</button></div>
+<div id="vL" class="auth"><div class="form"><h2 id="lt" style="font-size:28px"></h2><p class="sub" id="ld" style="margin-bottom:4px"></p>
+<label id="ln">Full name</label><input id="rn" autocomplete="name"><label id="l1"></label><input id="u" autocomplete="username"><label>Password</label><input id="pw" type="password" autocomplete="current-password">
+<div class="row"><button class="btn" id="in">Log in</button><button class="btn g" id="rg"></button><button class="btn g" id="sw"></button></div><div class="note mono" id="hint"></div><div class="note mono" id="sync2" style="margin-top:6px">Connecting…</div><div class="res r" id="lerr" hidden></div></div></div>
+<div id="vF" class="app"><div class="ph"><h2>Attendance dashboard</h2><p>Run a session, watch check-ins arrive live and manage your class roster.</p></div>
+<div class="stats"><div class="stat"><b id="sP">0</b><span>Present</span></div><div class="stat"><b id="sF">0</b><span>Flagged</span></div><div class="stat"><b id="sR">0</b><span>Rejected attempts</span></div><div class="stat"><b id="sA">0</b><span>Absent</span></div></div>
+<div class="card"><label style="margin-top:0">Course / session</label><input id="course" value="CS301 · Data Structures">
+<div class="row"><button class="btn" id="start">Start session</button><button class="btn g" id="end">End</button><button class="btn g" id="anchor">Anchor room to my GPS</button></div>
+<label>Rotating code</label><div class="code"><span id="code">------</span><svg class="ring" viewBox="0 0 48 48"><circle cx="24" cy="24" r="20" stroke="var(--line)"/><circle id="rg" cx="24" cy="24" r="20" stroke="var(--acc)" stroke-dasharray="125.7" stroke-dashoffset="0"/></svg></div>
+<div class="note" id="sstat">No active session.</div>
+<label>Live classroom map</label><svg class="map" id="mapF" viewBox="0 0 90 65"></svg></div>
+<div class="card"><div class="row" style="margin:0 0 8px;justify-content:space-between"><b>Live roster</b><span class="row" style="margin:0"><button class="btn g s" id="exA">Export absentees</button><button class="btn g s" id="exAll">Export all</button><button class="btn g s" id="clr">Reset</button></span></div>
+<div class="row" style="margin:0 0 10px"><input id="nid" placeholder="ID e.g. 21CS011" style="flex:1;min-width:110px"><input id="nname" placeholder="Student name" style="flex:2;min-width:140px"><input id="pin" placeholder="PIN (default 1234)" style="flex:1;min-width:110px"><button class="btn s" id="addS">Add student</button></div>
+<div class="tw"><table><thead><tr><th>Student</th><th>Status</th><th>Time</th><th></th></tr></thead><tbody id="rows"></tbody></table></div></div>
+</div>
+
+<div id="vS" class="app" hidden><div class="ph"><h2>Mark your attendance</h2><p>Enter the code shown in class, confirm your location and check in.</p></div>
+<div class="card"><b id="me"></b><div class="note mono" id="sess"></div>
+<label>6-digit session code</label><input id="scode" inputmode="numeric" maxlength="7" placeholder="123456" class="mono">
+<label>Location source</label>
+<div class="row" style="margin-top:0"><button class="btn g s" id="gps">Use real GPS</button><button class="btn g s" data-p="in">Inside room</button><button class="btn g s" data-p="edge">Doorway</button><button class="btn g s" data-p="out">Parking lot</button></div>
+<div class="note mono" id="locinfo">Tap the map to place yourself.</div>
+<label>Reported accuracy (m)</label><input id="acc" type="number" value="8" min="0" max="500">
+<div class="ck"><input type="checkbox" id="mock"><span>Simulate a mock-location provider flag</span></div>
+<div class="ck"><input type="checkbox" id="alt"><span>Pretend this is a different phone</span></div>
+<div class="row"><button class="btn" id="go">Check in</button></div><div id="res"></div></div>
+<div class="card"><b>Where you are</b><div class="note" style="margin:4px 0 10px">Green outline = classroom polygon. Tap to move your pin.</div><svg class="map" id="mapS" viewBox="0 0 90 65"></svg></div>
+</div>
+<p class="note" id="tip">Open this page on two phones: log in as faculty on one and as a student on the other. Check-ins appear on the faculty dashboard in real time.</p>
+</section>
+<div id="toast" style="position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#0b1320;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:.3s;z-index:50;pointer-events:none"></div>
+<footer>GeoAttend Lite · PS-037 · Location is read only at check-in. Never tracked outside class.</footer>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function toast(m){const t=$('#toast');t.textContent=m;t.style.opacity=1;clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.opacity=0,3000)}
+/* ---------- geometry ---------- */
+const POLY_M=[[0,0],[36,0],[36,22],[14,22],[0,16]];
+let O={lat:13.0827,lng:80.2707};
+const mLat=111320,mLng=()=>111320*Math.cos(O.lat*Math.PI/180);
+const toLL=([x,y])=>({lat:O.lat+y/mLat,lng:O.lng+x/mLng()});
+const toXY=p=>[(p.lng-O.lng)*mLng(),(p.lat-O.lat)*mLat];
+const poly=()=>POLY_M.map(toLL),centre=()=>toLL([18,11]);
+function hav(a,b){const r=Math.PI/180,R=6371000,dA=(b.lat-a.lat)*r,dO=(b.lng-a.lng)*r;const h=Math.sin(dA/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dO/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
+function inPoly(p,pg){let c=false;for(let i=0,j=pg.length-1;i<pg.length;j=i++){const a=pg[i],b=pg[j];if((a.lat>p.lat)!==(b.lat>p.lat)&&p.lng<(b.lng-a.lng)*(p.lat-a.lat)/(b.lat-a.lat)+a.lng)c=!c}return c}
+function edgeDist(p,pg){const P=toXY(p);let best=1e9;for(let i=0;i<pg.length;i++){const A=toXY(pg[i]),B=toXY(pg[(i+1)%pg.length]),dx=B[0]-A[0],dy=B[1]-A[1];let t=((P[0]-A[0])*dx+(P[1]-A[1])*dy)/(dx*dx+dy*dy);t=Math.max(0,Math.min(1,t));best=Math.min(best,Math.hypot(P[0]-A[0]-t*dx,P[1]-A[1]-t*dy))}return best}
+/* ---------- code + device ---------- */
+function hsh(s){let a=0xdeadbeef,b=0x41c6ce57;for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);a=Math.imul(a^c,2654435761);b=Math.imul(b^c,1597334677)}a=Math.imul(a^a>>>16,2246822507)^Math.imul(b^b>>>13,3266489909);b=Math.imul(b^b>>>16,2246822507)^Math.imul(a^a>>>13,3266489909);return(a^b)>>>0}
+const WIN=30000,codeFor=(sec,w)=>String(hsh(sec+':'+w)%1000000).padStart(6,'0'),curWin=()=>Math.floor(Date.now()/WIN);
+function deviceId(){let d;try{d=localStorage.getItem('ga_dev')}catch(e){}if(!d){d='D'+hsh(navigator.userAgent+screen.width+screen.height+(Intl.DateTimeFormat().resolvedOptions().timeZone||'')+Math.random()).toString(36);try{localStorage.setItem('ga_dev',d)}catch(e){}}return d}
+/* ---------- data layer (shared db, in-memory fallback) ---------- */
+function memDb(){const M={},L=[],note=()=>L.slice().forEach(f=>f());
+  const doc=p=>({set:async d=>{M[p]=d;note()},update:async d=>{M[p]=Object.assign({},M[p],d);note()},delete:async()=>{delete M[p];note()},onSnapshot(cb){const f=()=>cb({exists:!!M[p],data:()=>M[p]});L.push(f);f();return()=>{}}});
+  const col=p=>({doc:id=>doc(p+'/'+id),onSnapshot(cb){const f=()=>cb({docs:Object.keys(M).filter(k=>k.startsWith(p+'/')&&!k.slice(p.length+1).includes('/')).map(k=>({id:k.split('/').pop(),data:()=>M[k]}))});L.push(f);f();return()=>{}}});
+  return{doc,collection:col}}
+function netDb(){const M={},L=[];let ready=false;const note=()=>L.slice().forEach(f=>f());
+  const api=(m,p,b)=>fetch('/api/doc/'+p,{method:m,headers:{'Content-Type':'application/json'},body:b?JSON.stringify(b):undefined}).then(r=>{if(!r.ok)throw new Error(r.status)});
+  const doc=p=>({set:async d=>{M[p]=d;note();await api('PUT',p,d)},update:async d=>{M[p]=Object.assign({},M[p],d);note();await api('PATCH',p,d)},delete:async()=>{delete M[p];note();await api('DELETE',p)},
+    onSnapshot(cb){const f=()=>cb({exists:!!M[p],data:()=>M[p]});L.push(f);if(ready)f();return()=>{}}});
+  const col=p=>({doc:id=>doc(p+'/'+id),onSnapshot(cb){const f=()=>cb({docs:Object.keys(M).filter(k=>k.startsWith(p+'/')&&!k.slice(p.length+1).includes('/')).map(k=>({id:k.split('/').pop(),data:()=>M[k]}))});L.push(f);if(ready)f();return()=>{}}});
+  const st=(t,c)=>{const e=document.getElementById('sync');e.textContent=t;e.style.color=c};
+  const es=new EventSource('/api/events');
+  es.onmessage=e=>{const m=JSON.parse(e.data);if(m.t==='init'){Object.keys(M).forEach(k=>delete M[k]);Object.assign(M,m.data);ready=true}else if(m.t==='set')M[m.p]=m.d;else delete M[m.p];note()};
+  es.onopen=()=>st('● LIVE · synced across devices','#3ddc97');es.onerror=()=>st('● reconnecting…','#ffd23c');
+  return{doc,collection:col}}
+const P='classroom/meta',key=s=>String(s).replace(/[^A-Za-z0-9_-]/g,'_');
+let DB=null,LIVE=false,SESSION=null,STUDENTS=[],FACULTY=[],RECORDS=[],READY={},USER=null,ROLE='faculty',MODE='login',pendRm=null;
+try{USER=JSON.parse(sessionStorage.getItem('ga_user'))}catch(e){}
+const col=n=>DB.collection(P+'/'+n),need=()=>{if(DB&&READY.m&&READY.s&&READY.f&&READY.r)return true;toast('Connecting… please try again in a moment.');return false};
+const saveMeta=()=>DB.doc(P).set({session:JSON.stringify(SESSION),origin:JSON.stringify(O)});
+const RS=()=>SESSION?RECORDS.filter(r=>r.sess===SESSION.id):[];
+async function initDb(){const d=netDb();
+  LIVE=!!d;DB=d||memDb();const sy=$('#sync');sy.textContent=LIVE?'● LIVE · synced across devices':'○ OFFLINE DEMO · not synced';sy.style.color=LIVE?'#3ddc97':'#ffd23c';
+  const er=()=>{sy.textContent='● connection issue';sy.style.color='#ff5b6e'};
+  DB.doc(P).onSnapshot(s=>{const v=s.exists?s.data():null;try{SESSION=v&&v.session?JSON.parse(v.session):null;if(v&&v.origin)O=JSON.parse(v.origin)}catch(e){}READY.m=1;renderAll()},er);
+  col('students').onSnapshot(q=>{STUDENTS=q.docs.map(x=>x.data());READY.s=1;renderAll()},er);
+  col('faculty').onSnapshot(q=>{FACULTY=q.docs.map(x=>x.data());READY.f=1;renderAll()},er);
+  col('records').onSnapshot(q=>{RECORDS=q.docs.map(x=>{const r=x.data();return Object.assign({},r,{id:x.id,flags:JSON.parse(r.fl||'[]'),rej:JSON.parse(r.rj||'[]'),loc:{lat:r.lat,lng:r.lng}})}).sort((a,b)=>a.t-b.t);READY.r=1;renderAll()},er)}
+/* ---------- validator ---------- */
+function validate({sid,code,loc,acc,mock,dev}){
+  const flags=[],rej=[],pg=poly(),ses=SESSION,dist=hav(loc,centre());
+  if(!ses||!ses.active)return{status:'rejected',rej:['No active session'],flags,dist};
+  const w=curWin();if(code!==codeFor(ses.secret,w)&&code!==codeFor(ses.secret,w-1))rej.push('Invalid or expired code');
+  const inside=inPoly(loc,pg),ed=edgeDist(loc,pg);
+  if(!inside){if(ed<=Math.min(acc,8))flags.push('On boundary ('+ed.toFixed(1)+' m outside)');else rej.push('Outside classroom polygon ('+ed.toFixed(0)+' m away)')}
+  if(acc>50)flags.push('Low GPS accuracy ('+Math.round(acc)+' m)');
+  if(acc<=1)flags.push('Suspiciously perfect accuracy');
+  if(mock)flags.push('Mock-location provider flagged');
+  const last=RECORDS.filter(r=>r.dev===dev).pop();if(last){const dt=(Date.now()-last.t)/1000;if(dt>0&&dt<900){const v=hav(last.loc,loc)/dt;if(v>14)flags.push('Speed jump: '+v.toFixed(0)+' m/s')}}
+  const other=RECORDS.find(r=>r.dev===dev&&r.sid!==sid&&r.sess===ses.id&&r.status!=='rejected');if(other)flags.push('Same device used by '+other.sid);
+  return{status:rej.length?'rejected':flags.length?'flagged':'present',rej,flags,dist,inside}}
+/* ---------- faculty ---------- */
+$('#start').onclick=async()=>{if(!need())return;SESSION={id:'S'+Date.now(),secret:Math.random().toString(36).slice(2),course:$('#course').value||'Session',active:true,start:Date.now()};renderAll();try{await saveMeta()}catch(e){toast('Could not start session: no write access.')}};
+$('#end').onclick=async()=>{if(!need()||!SESSION)return;SESSION.active=false;renderAll();await saveMeta()};
+$('#clr').onclick=async()=>{if(!need())return;SESSION=null;renderAll();await saveMeta();await Promise.all(RECORDS.map(r=>col('records').doc(r.id).delete()))};
+$('#anchor').onclick=()=>navigator.geolocation?navigator.geolocation.getCurrentPosition(async p=>{O={lat:p.coords.latitude,lng:p.coords.longitude};renderAll();if(need())await saveMeta();toast('Room anchored to your location.')},()=>toast('Location permission denied.'),{enableHighAccuracy:true}):toast('Geolocation unavailable');
+function statusOf(id){const rs=RS().filter(r=>r.sid===id);return rs.find(r=>r.status==='present')||rs.find(r=>r.status==='flagged')||rs[rs.length-1]||null}
+const fmt=t=>new Date(t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+const sorted=()=>STUDENTS.slice().sort((a,b)=>a.id<b.id?-1:1);
+function renderFaculty(){
+  let p=0,f=0,a=0;const rows=sorted().map(({id,name:n})=>{const r=statusOf(id);let b,extra='',act='';
+    if(!r||r.status==='rejected'){a++;b=r?'<span class="b r">Rejected</span>':'<span class="b a">Absent</span>';if(r)extra=r.rej.map(x=>'<div class="fl r">'+esc(x)+'</div>').join('')}
+    else if(r.status==='flagged'){f++;b='<span class="b f">Flagged</span>';extra=r.flags.map(x=>'<div class="fl">⚑ '+esc(x)+'</div>').join('');act='<button class="btn s" data-ap="'+r.id+'">Approve</button>'}
+    else{p++;b='<span class="b p">Present</span>'+(r.approved?' <span class="note">approved</span>':'');extra='<div class="note" style="margin:2px 0 0">'+r.dist.toFixed(1)+' m from centre</div>'}
+    act+=' <button class="btn g s" data-rm="'+esc(id)+'">'+(pendRm===id?'Click again to confirm':'Remove')+'</button>';
+    return '<tr><td><b>'+esc(n)+'</b><div class="note mono" style="margin:0">'+esc(id)+'</div>'+extra+'</td><td>'+b+'</td><td class="mono">'+(r?fmt(r.t):'—')+'</td><td>'+act+'</td></tr>'}).join('');
+  $('#rows').innerHTML=rows||'<tr><td colspan="4" class="note">No students yet. Add students above, or ask them to register.</td></tr>';
+  $('#sP').textContent=p;$('#sF').textContent=f;$('#sA').textContent=a;$('#sR').textContent=RS().filter(r=>r.status==='rejected').length;
+  $$('[data-rm]').forEach(b=>b.onclick=async()=>{const id=b.dataset.rm;if(pendRm!==id){pendRm=id;renderFaculty();setTimeout(()=>{if(pendRm===id){pendRm=null;renderFaculty()}},3000);return}pendRm=null;await col('students').doc(key(id)).delete();await Promise.all(RECORDS.filter(r=>r.sid===id).map(r=>col('records').doc(r.id).delete()))});
+  $$('[data-ap]').forEach(b=>b.onclick=()=>col('records').doc(b.dataset.ap).update({status:'present',approved:1}));
+  const s=SESSION;$('#sstat').textContent=!s?'No active session. Press Start session.':(s.active?'Live: '+s.course+' · started '+fmt(s.start):'Ended: '+s.course);
+  drawMap($('#mapF'),RS().map(r=>({xy:toXY(r.loc),c:r.status==='present'?'var(--ok)':r.status==='flagged'?'var(--warn)':'var(--bad)'})))}
+function tick(){const s=SESSION,w=curWin(),el=Date.now()%WIN;$('#code').textContent=s&&s.active?codeFor(s.secret,w).replace(/(\d{3})(\d{3})/,'$1 $2'):'--- ---';$('#rg').style.strokeDashoffset=String(125.7*(el/WIN))}
+setInterval(tick,250);
+const csv=rows=>rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+async function dl(name,text){const blob=new Blob([text],{type:'text/csv'});try{const d=window.claude&&await claude.use('downloads');if(d){await d.save({filename:name,data:blob});return}}catch(e){if(e&&e.code==='declined')return}const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click()}
+$('#exA').onclick=()=>dl('absentees.csv',csv([['Student ID','Name','Course']].concat(sorted().filter(s=>{const r=statusOf(s.id);return !r||r.status==='rejected'}).map(s=>[s.id,s.name,SESSION?SESSION.course:'']))));
+$('#exAll').onclick=()=>dl('attendance.csv',csv([['Student ID','Name','Status','Time','Distance m','Flags']].concat(sorted().map(s=>{const r=statusOf(s.id);return[s.id,s.name,r?r.status:'absent',r?fmt(r.t):'',r&&r.dist?r.dist.toFixed(1):'',r?r.flags.concat(r.rej).join('; '):'']}))));
+$('#addS').onclick=async()=>{if(!need())return;const id=$('#nid').value.trim().toUpperCase(),n=$('#nname').value.trim();if(!id||!n)return toast('Enter both an ID and a name.');if(STUDENTS.some(x=>x.id===id))return toast('That ID is already on the roster.');
+  await col('students').doc(key(id)).set({id,name:n,pin:hsh('s:'+($('#pin').value.trim()||'1234'))});$('#nid').value=$('#nname').value=$('#pin').value=''};
+/* ---------- maps ---------- */
+const sx=x=>x+25,sy=y=>50-y;
+function drawMap(svg,dots,pin){const pts=POLY_M.map(([x,y])=>sx(x)+','+sy(y)).join(' ');
+  let g='<defs><pattern id="gp'+svg.id+'" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M5 0H0V5" fill="none" stroke="var(--line)" stroke-width=".15"/></pattern></defs><rect width="90" height="65" fill="url(#gp'+svg.id+')"/>';
+  g+='<polygon points="'+pts+'" fill="var(--accbg)" stroke="var(--acc)" stroke-width=".6" stroke-dasharray="1.5 1"/><text x="'+sx(18)+'" y="'+sy(11)+'" font-size="3" text-anchor="middle" fill="var(--acc)" font-family="monospace">ROOM 204</text>';
+  dots.forEach(d=>g+='<circle cx="'+sx(d.xy[0])+'" cy="'+sy(d.xy[1])+'" r="1.3" fill="'+d.c+'"/>');
+  if(pin)g+='<circle cx="'+sx(pin[0])+'" cy="'+sy(pin[1])+'" r="2.6" fill="none" stroke="var(--ink)" stroke-width=".5"/><circle cx="'+sx(pin[0])+'" cy="'+sy(pin[1])+'" r="1.1" fill="var(--ink)"/>';
+  svg.innerHTML=g}
+/* ---------- student ---------- */
+let loc={xy:[18,11],src:'sim'};
+function showMe(){const st=USER&&USER.role==='student',s=SESSION;$('#me').textContent=st?'Checking in as '+USER.name+' ('+USER.id+')':'';$('#sess').textContent=s&&s.active?'● Session live: '+s.course:'○ Waiting for faculty to start a session'}
+function setLoc(xy,src,real){loc={xy,src,real};const l=real||toLL(xy);$('#locinfo').textContent=(src==='gps'?'GPS ':'SIM ')+l.lat.toFixed(6)+', '+l.lng.toFixed(6)+' · in room: '+(inPoly(l,poly())?'yes':'no');drawMap($('#mapS'),[],xy)}
+$('#mapS').addEventListener('pointerdown',e=>{const s=$('#mapS'),pt=s.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const q=pt.matrixTransform(s.getScreenCTM().inverse());setLoc([q.x-25,50-q.y],'sim')});
+const PRE={in:[16,10],edge:[14.5,22.8],out:[60,-10]};$$('[data-p]').forEach(b=>b.onclick=()=>setLoc(PRE[b.dataset.p],'sim'));
+$('#gps').onclick=()=>navigator.geolocation?navigator.geolocation.getCurrentPosition(p=>{const l={lat:p.coords.latitude,lng:p.coords.longitude};$('#acc').value=Math.round(p.coords.accuracy);setLoc(toXY(l),'gps',l)},()=>toast('Location permission denied or unavailable.'),{enableHighAccuracy:true,timeout:15000}):toast('Geolocation unavailable');
+$('#go').onclick=async()=>{if(!need())return;const sid=USER&&USER.id;if(!sid)return;const code=$('#scode').value.replace(/\D/g,''),l=loc.real||toLL(loc.xy),acc=+$('#acc').value||0,dev=deviceId()+($('#alt').checked?':'+sid:'');
+  const box=(c,h)=>$('#res').innerHTML='<div class="res '+c+'">'+h+'</div>';
+  const cur=statusOf(sid);if(cur&&cur.status==='present')return box('p','<b>✓ You are already marked present.</b>');
+  const v=validate({sid,code,loc:l,acc,mock:$('#mock').checked,dev});
+  try{await col('records').doc('r'+Date.now()+Math.random().toString(36).slice(2,5)).set({sess:SESSION?SESSION.id:'',sid,dev,t:Date.now(),status:v.status,fl:JSON.stringify(v.flags),rj:JSON.stringify(v.rej),dist:v.dist,lat:l.lat,lng:l.lng,acc,approved:0})}catch(e){return box('r','<b>Could not save your check-in.</b> Please try again.')}
+  const m={present:['p','✓ Checked in. Welcome to class.'],flagged:['f','⚑ Recorded, flagged for faculty review.'],rejected:['r','✕ Check-in rejected.']}[v.status];
+  box(m[0],'<b>'+m[1]+'</b>'+v.rej.concat(v.flags).map(x=>'<div>• '+esc(x)+'</div>').join('')+'<div class="mono" style="margin-top:6px;font-size:12px">'+v.dist.toFixed(1)+' m from room centre (Haversine)</div>')};
+function renderAll(){showMe();renderFaculty();tick();if(!$('#vS').hidden)setLoc(loc.xy,loc.src,loc.real)}
+/* ---------- auth ---------- */
+function setRole(r){ROLE=r;const f=r==='faculty',g=MODE==='register';
+  $('#lt').textContent=(g?'Create ':'')+(f?'Faculty ':'Student ')+(g?'account':'login');
+  $('#ld').textContent=g?(f?'Register to run sessions and manage your class roster.':'Register with your student ID to check in to class.'):(f?'Start sessions, monitor the live roster and manage students.':'Check in to your class with the session code.');
+  $('#ln').hidden=$('#rn').hidden=!g;$('#l1').textContent=f?'Faculty email':'Student ID';$('#u').placeholder=f?'name@campus.edu':'e.g. 21CS011';
+  $('#in').textContent=g?'Create account':'Log in';$('#rg').textContent=g?'Back to login':'Register';$('#sw').textContent=f?'I am a student':'I am faculty';
+  $('#hint').textContent=g?'Password: at least 4 characters.':(f?'Demo: faculty@campus.edu / faculty123':'New student? Tap Register to create your login.');$('#lerr').hidden=true}
+function showView(){const f=USER&&USER.role==='faculty',st=USER&&USER.role==='student';$('#vL').hidden=!!USER;$('nav').hidden=$('footer').hidden=$('#tip').hidden=!USER;$('#portal').style.paddingTop=USER?'96px':'24px';$('#bar').hidden=!USER;$('#vF').hidden=!f;$('#vS').hidden=!st;
+  $('#who').innerHTML=USER?'<span class="chip">'+(f?'FACULTY':'STUDENT')+'</span>'+esc(USER.name)+(st?' <span class="note mono">'+esc(USER.id)+'</span>':''):'';renderAll()}
+const err=m=>{const e=$('#lerr');e.hidden=false;e.textContent=m};
+function enter(ok){USER=ok;try{sessionStorage.setItem('ga_user',JSON.stringify(ok))}catch(e){}$('#pw').value=$('#rn').value='';$('#res').innerHTML='';MODE='login';setRole(ROLE);showView()}
+$('#in').onclick=async()=>{if(!need())return;const u=$('#u').value.trim(),pw=$('#pw').value,nm=$('#rn').value.trim(),f=ROLE==='faculty';
+  try{
+  if(MODE==='register'){
+    if(!nm||!u||pw.length<4)return err('Enter your name, '+(f?'email':'student ID')+' and a password of 4+ characters.');
+    if(f){const em=u.toLowerCase();if(!/^\S+@\S+\.\S+$/.test(em))return err('Enter a valid email address.');
+      if(em==='faculty@campus.edu'||FACULTY.some(x=>x.email===em))return err('An account with this email already exists.');
+      await col('faculty').doc(key(em)).set({email:em,name:nm,pw:hsh('f:'+pw)});return enter({role:'faculty',id:em,name:nm})}
+    const id=u.toUpperCase();if(STUDENTS.some(x=>x.id===id))return err('This student ID is already registered. Please log in.');
+    await col('students').doc(key(id)).set({id,name:nm,pin:hsh('s:'+pw)});return enter({role:'student',id,name:nm})}
+  if(f){const em=u.toLowerCase(),a=FACULTY.find(x=>x.email===em&&x.pw===hsh('f:'+pw));
+    if(a)return enter({role:'faculty',id:em,name:a.name});if(em==='faculty@campus.edu'&&pw==='faculty123')return enter({role:'faculty',id:em,name:'Prof. Sharma'})}
+  else{const r=STUDENTS.find(x=>x.id.toLowerCase()===u.toLowerCase());if(r&&r.pin===hsh('s:'+pw))return enter({role:'student',id:r.id,name:r.name})}
+  err('Invalid credentials. New here? Use Register.')}catch(e){err('Could not complete that. Check your connection and access, then retry.')}};
+$('#rg').onclick=()=>{MODE=MODE==='login'?'register':'login';setRole(ROLE)};
+$('#pw').onkeydown=e=>{if(e.key==='Enter')$('#in').click()};
+$('#out').onclick=()=>{MODE='login';USER=null;try{sessionStorage.removeItem('ga_user')}catch(e){}$('#u').value='';setRole(ROLE);showView()};
+$('#sw').onclick=()=>{MODE='login';setRole(ROLE==='faculty'?'student':'faculty')};
+$$('[data-go]').forEach(a=>a.addEventListener('click',()=>{if(!USER){MODE='login';setRole(a.dataset.go)}}));
+new MutationObserver(()=>{const a=$('#sync'),c=$('#sync2'),t=a.textContent;c.textContent=t+(t.includes('OFFLINE')?' — check your connection.':'');c.style.color=a.style.color}).observe($('#sync'),{childList:true,characterData:true,subtree:true,attributes:true});
+setRole(USER&&USER.role==='student'?'student':'faculty');showView();initDb();
+</script>
+</body>
+</html>
